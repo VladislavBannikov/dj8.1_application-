@@ -4,21 +4,14 @@ from django.shortcuts import render
 
 from .models import Columns, FilePath
 
-CSV_FILENAME = FilePath.get_path()  # TODO: check if Null or False
-
-# COLUMNS = [
-#     {'name': 'id', 'width': 1},
-#     {'name': 'name', 'width': 3},
-#     {'name': 'price', 'width': 2},
-#     {'name': 'release_date', 'width': 2},
-#     {'name': 'lte_exists', 'width': 1},
-# ]
-COLUMNS = Columns.objects.all().order_by("order_number").values("name", "width")
 
 
 def table_view(request):
+    csv_filename = FilePath.get_path()  # TODO: check if Null or False
+    columns = Columns.objects.all().order_by("order_number").values("name", "width")
+
     template = "table.html"
-    with open(CSV_FILENAME, "rt") as csv_file:
+    with open(csv_filename, "rt") as csv_file:
         header = []
         table = []
         table_reader = csv.reader(csv_file, delimiter=";")
@@ -32,6 +25,6 @@ def table_view(request):
                 }
                 table.append(row)
 
-        context = {"columns": COLUMNS, "table": table, "csv_file": CSV_FILENAME}
+        context = {"columns": columns, "table": table, "csv_file": csv_filename}
         result = render(request, template, context)
     return result
